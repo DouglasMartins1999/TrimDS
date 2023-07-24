@@ -1,7 +1,17 @@
 package main
 
-import "dotins.eu.org/trimds/gui"
+import (
+	"os"
+
+	"dotins.eu.org/trimds/gui"
+	"dotins.eu.org/trimds/lib"
+)
 
 func main() {
-	gui.Init()
+	if len(os.Args) > 1 {
+		lib.AddROMs(os.Args[1:])
+		lib.Trim()
+	} else {
+		gui.Init()
+	}
 }

@@ -1,6 +1,7 @@
 package gui
 
 import (
+	"dotins.eu.org/trimds/lib"
 	"github.com/ying32/govcl/vcl"
 	"github.com/ying32/govcl/vcl/types"
 )
@@ -64,6 +65,12 @@ func (f *TMainForm) OnFormCreate(sender vcl.IObject) {
 	configureActionPanel(MainForm.ActionPanel)
 }
 
+func (f *TMainForm) OnFormDropFiles(sender vcl.IObject, aFileNames []string) {
+	lib.AddROMs(aFileNames)
+	RenderList()
+	RenderStatus()
+}
+
 func configureMainForm(f vcl.TForm) {
 	f.SetCaption("TrimDS - Trim DS Roms")
 	f.SetPosition(types.PoScreenCenter)
@@ -74,6 +81,7 @@ func configureMainForm(f vcl.TForm) {
 	f.Constraints().SetMaxWidth(1000)
 	f.Constraints().SetMinHeight(300)
 	f.Constraints().SetMinWidth(450)
+	f.SetAllowDropFiles(true)
 }
 func configureListView(lv vcl.TListView) {
 	lv.SetAlign(types.AlClient)
@@ -112,9 +120,7 @@ func configureListView(lv vcl.TListView) {
 	col.SetWidth(100)
 	col.SetAlignment(types.MbMiddle)
 
-	lv.SetOnDblClick(func(sender vcl.IObject) {
-		DeleteROM(MainForm.FileList.ItemIndex())
-	})
+	lv.SetOnDblClick(DeleteROM)
 }
 func configureDialogFile(d vcl.TOpenDialog) {
 	d.SetFilter("NDS ROMS(*.nds)|*.nds")

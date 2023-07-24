@@ -57,10 +57,13 @@ func RenderStatus() {
 func AddROM(sender vcl.IObject) {
 	if MainForm.DialogFile.Execute() {
 		files := MainForm.DialogFile.Files()
+		paths := []string{}
 
 		for i := int32(0); i < files.Count(); i++ {
-			lib.AddROM(files.S(i))
+			paths = append(paths, files.S(i))
 		}
+
+		lib.AddROMs(paths)
 
 		RenderList()
 		RenderStatus()
@@ -75,18 +78,16 @@ func AddROMFolder(sender vcl.IObject) {
 	}
 }
 
-func DeleteROM(index int32) {
+func DeleteROM(sender vcl.IObject) {
+	index := MainForm.FileList.ItemIndex()
+
 	if index != -1 {
-		lib.DeleteROM(index)
+		lib.DeleteROM(int(index))
 		RenderList()
 		RenderStatus()
 	}
 }
 
 func TrimROMQueue(sender vcl.IObject) {
-	for _, x := range lib.Values() {
-		if x.Trim() {
-			DeleteROM(int32(lib.IndexOf(x)))
-		}
-	}
+	lib.Trim()
 }

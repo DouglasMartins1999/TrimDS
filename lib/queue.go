@@ -3,8 +3,8 @@ package lib
 import (
 	"fmt"
 	"io/fs"
-	"io/ioutil"
 	"math"
+	"os"
 	"path"
 	"runtime"
 
@@ -22,36 +22,53 @@ func FindROM(path string) (ROM, bool) {
 	})
 }
 
-func AddROM(path string) *ROM {
-	if _, exists := FindROM(path); exists {
+func AddROM(file string) *ROM {
+	stat, _ := os.Stat(file)
+
+	if stat.IsDir() {
+		AddROMFolder(file)
+	}
+
+	if path.Ext(file) != ".nds" {
 		return nil
 	}
 
-	rom := ROM{Path: path}
-	rom.CalcFileSize().CalcROMSize().CheckWiFi()
-	queue = append(queue, rom)
+	if _, exists := FindROM(file); exists {
+		return nil
+	}
+
+	rom := QueueROM(file)
 	return &rom
 }
 
-func AddROMFolder(folder string) []ROM {
-	dirFiles := lo.Must(ioutil.ReadDir(folder))
-	ndsRoms := lo.Filter(dirFiles, func(f fs.FileInfo, i int) bool {
-		ext := path.Ext(f.Name())
-		_, exists := FindROM(path.Join(folder, f.Name()))
-		return !f.IsDir() && ext == ".nds" && !exists
+func AddROMs(files []string) {
+	for i := 0; i < len(files); i++ {
+		AddROM(files[i])
+	}
+}
+
+func AddROMFolder(folder string) []*ROM {
+	dirFiles := lo.Must(os.ReadDir(folder))
+	ndsRoms := lo.Filter(dirFiles, func(f fs.DirEntry, i int) bool {
+		return !f.IsDir()
 	})
 
-	newFiles := lo.Map(ndsRoms, func(f fs.FileInfo, i int) ROM {
-		rom := ROM{Path: path.Join(folder, f.Name())}
-		rom.CalcFileSize().CalcROMSize().CheckWiFi()
-		return rom
+	newFiles := lo.Map(ndsRoms, func(f fs.DirEntry, i int) *ROM {
+		file := path.Join(folder, f.Name())
+		return AddROM(file)
 	})
 
-	queue = append(queue, newFiles...)
 	return newFiles
 }
 
-func DeleteROM(index int32) {
+func QueueROM(file string) ROM {
+	rom := ROM{Path: path.Clean(file)}
+	rom.CalcFileSize().CalcROMSize().CheckWiFi()
+	queue = append(queue, rom)
+	return rom
+}
+
+func DeleteROM(index int) {
 	queue = append(queue[:index], queue[index+1:]...)
 }
 
@@ -65,6 +82,14 @@ func Size() int {
 
 func Values() []ROM {
 	return queue
+}
+
+func Trim() {
+	for _, x := range Values() {
+		if x.Trim() {
+			DeleteROM(IndexOf(x))
+		}
+	}
 }
 
 func TotalFileSize() int64 {

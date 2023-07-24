@@ -72,6 +72,10 @@ func DeleteROM(index int) {
 	queue = append(queue[:index], queue[index+1:]...)
 }
 
+func Clear() {
+	queue = []ROM{}
+}
+
 func IndexOf(r ROM) int {
 	return lo.IndexOf(queue, r)
 }

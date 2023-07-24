@@ -1,6 +1,8 @@
 package gui
 
 import (
+	"runtime"
+
 	"dotins.eu.org/trimds/lib"
 	"github.com/ying32/govcl/vcl"
 	"github.com/ying32/govcl/vcl/types"
@@ -24,6 +26,7 @@ type TStatusBar struct {
 type TMainForm struct {
 	*vcl.TForm
 
+	MainMenu     *vcl.TMainMenu
 	DialogFile   *vcl.TOpenDialog
 	DialogFolder *vcl.TSelectDirectoryDialog
 	FileList     *vcl.TListView
@@ -43,6 +46,7 @@ func Init() {
 }
 
 func (f *TMainForm) OnFormCreate(sender vcl.IObject) {
+	f.MainMenu = vcl.NewMainMenu(f)
 	f.FileList = vcl.NewListView(f)
 	f.DialogFile = vcl.NewOpenDialog(f)
 	f.DialogFolder = vcl.NewSelectDirectoryDialog(f)
@@ -58,6 +62,7 @@ func (f *TMainForm) OnFormCreate(sender vcl.IObject) {
 	f.ActionPanel.SetParent(f)
 
 	configureMainForm(*MainForm.TForm)
+	configureMainMenu(MainForm)
 	configureDialogFile(*MainForm.DialogFile)
 	configureDialogFolder(*MainForm.DialogFolder)
 	configureListView(*MainForm.FileList)
@@ -82,6 +87,69 @@ func configureMainForm(f vcl.TForm) {
 	f.Constraints().SetMinHeight(300)
 	f.Constraints().SetMinWidth(450)
 	f.SetAllowDropFiles(true)
+}
+func configureMainMenu(f *TMainForm) {
+	if runtime.GOOS == "darwin" {
+		appMenu := vcl.NewMenuItem(f)
+
+		appMenu.SetCaption(types.AppleLogoChar)
+		subItem := vcl.NewMenuItem(f)
+
+		subItem.SetCaption("About")
+		subItem.SetOnClick(About)
+		appMenu.Add(subItem)
+
+		f.MainMenu.Items().Insert(0, appMenu)
+	}
+
+	item := vcl.NewMenuItem(f)
+	item.SetCaption("File")
+
+	subMenu := vcl.NewMenuItem(f)
+	subMenu.SetCaption("Add File (&F)")
+	subMenu.SetShortCutFromString("Ctrl+F")
+	subMenu.SetOnClick(AddROM)
+	item.Add(subMenu)
+
+	subMenu = vcl.NewMenuItem(f)
+	subMenu.SetCaption("Add Folder (&O)")
+	subMenu.SetShortCutFromString("Ctrl+O")
+	subMenu.SetOnClick(AddROMFolder)
+	item.Add(subMenu)
+
+	subMenu = vcl.NewMenuItem(f)
+	subMenu.SetCaption("-")
+	item.Add(subMenu)
+
+	subMenu = vcl.NewMenuItem(f)
+	subMenu.SetCaption("Trim Files (&T)")
+	subMenu.SetShortCutFromString("Ctrl+T")
+	subMenu.SetOnClick(TrimROMQueue)
+	item.Add(subMenu)
+
+	subMenu = vcl.NewMenuItem(f)
+	subMenu.SetCaption("Clear List (&D)")
+	subMenu.SetShortCutFromString("Ctrl+D")
+	subMenu.SetOnClick(DeleteQueue)
+	item.Add(subMenu)
+
+	subMenu = vcl.NewMenuItem(f)
+	subMenu.SetCaption("-")
+	item.Add(subMenu)
+
+	subMenu = vcl.NewMenuItem(f)
+	subMenu.SetCaption("About (&A)")
+	subMenu.SetShortCutFromString("Ctrl+A")
+	subMenu.SetOnClick(About)
+	item.Add(subMenu)
+
+	subMenu = vcl.NewMenuItem(f)
+	subMenu.SetCaption("Exit (&Q)")
+	subMenu.SetShortCutFromString("Ctrl+Q")
+	subMenu.SetOnClick(Exit)
+	item.Add(subMenu)
+
+	f.MainMenu.Items().Add(item)
 }
 func configureListView(lv vcl.TListView) {
 	lv.SetAlign(types.AlClient)

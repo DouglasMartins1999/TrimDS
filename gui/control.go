@@ -91,3 +91,17 @@ func DeleteROM(sender vcl.IObject) {
 func TrimROMQueue(sender vcl.IObject) {
 	lib.Trim()
 }
+
+func DeleteQueue(sender vcl.IObject) {
+	lib.Clear()
+	RenderList()
+	RenderStatus()
+}
+
+func Exit(vcl.IObject) {
+	MainForm.Close()
+}
+
+func About(vcl.IObject) {
+	vcl.ShowMessage("About\n© 2023 - Trim DS\n\nhttps://github.com/DouglasMartins1999\nDeveloped With Go + GoVCL")
+}

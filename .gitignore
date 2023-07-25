@@ -1,2 +1,2 @@
-liblcl.*
+dist/*
 .DS_Store

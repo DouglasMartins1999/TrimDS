@@ -1,8 +1,12 @@
+github.com/akavel/rsrc v0.10.2 h1:Zxm8V5eI1hW4gGaYsJQUhxpjkENuG91ki8B4zCrvEsw=
+github.com/akavel/rsrc v0.10.2/go.mod h1:uLoCtb9J+EyAqh+26kdrTgmzRBFPGOolLWKpdxkKq+c=
 github.com/samber/lo v1.38.1 h1:j2XEAqXKb09Am4ebOg31SpvzUTTs6EN3VfgeLUhPdXM=
 github.com/samber/lo v1.38.1/go.mod h1:+m/ZKRl6ClXCE2Lgf3MsQlWfh4bn1bz6CXEOxnEXnEA=
 github.com/ying32/dylib v0.0.0-20220227124818-fdf9ea9fbc96 h1:+kU/yXSAQPL4G7OQOxz/j62GdM+G5yd5J1/NNm7u3QI=
 github.com/ying32/dylib v0.0.0-20220227124818-fdf9ea9fbc96/go.mod h1:WPBTfbqg/aA1xqHFPB4fgBHETq/G/75yErbnexmaEOo=
 github.com/ying32/govcl v2.2.1-0.20220119140225-67935b26667e+incompatible h1:2aLQww8NELaso9E12tljg6pzyqEmuyV/ZeTLqvrJESM=
 github.com/ying32/govcl v2.2.1-0.20220119140225-67935b26667e+incompatible/go.mod h1:yZVtbJ9Md1nAVxtHKIriKZn4K6TQYqI1en3sN/m9FJ8=
+github.com/ying32/liblclbinres v0.0.0-20220111074620-df670ba4baf4 h1:g6QaezInPib6PtPzh4w1qEzQPD4bT3zbX8dfBCSFqYM=
+github.com/ying32/liblclbinres v0.0.0-20220111074620-df670ba4baf4/go.mod h1:oEmgAOPt+dALMzap3HgEQnaN+iCLE7m3C867jERInaI=
 golang.org/x/exp v0.0.0-20220303212507-bbda1eaf7a17 h1:3MTrJm4PyNL9NBqvYDSj3DHl46qQakyfqfWo4jgfaEM=
 golang.org/x/exp v0.0.0-20220303212507-bbda1eaf7a17/go.mod h1:lgLbSvA5ygNOMpwM/9anMpWVlVJ7Z+cHWq/eFuinpGE=

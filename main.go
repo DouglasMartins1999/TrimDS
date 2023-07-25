@@ -3,6 +3,8 @@ package main
 import (
 	"os"
 
+	_ "dotins.eu.org/trimds/syso"
+
 	"dotins.eu.org/trimds/gui"
 	"dotins.eu.org/trimds/lib"
 )

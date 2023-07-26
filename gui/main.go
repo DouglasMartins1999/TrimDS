@@ -38,7 +38,13 @@ var (
 	MainForm *TMainForm
 )
 
-func Init() {
+func Init(icon []byte) {
+	if runtime.GOOS != "darwin" {
+		appIcon := vcl.NewIcon()
+		appIcon.LoadFromBytes(icon)
+		vcl.Application.SetIcon(appIcon)
+	}
+
 	vcl.Application.Initialize()
 	vcl.Application.SetMainFormOnTaskBar(true)
 	vcl.Application.CreateForm(&MainForm)

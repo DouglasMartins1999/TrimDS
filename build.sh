@@ -36,6 +36,7 @@ fi
 
 APPNAME=trimDS
 APPLOCATION=./dist/$APPNAME.$GOARCH
+SYSOPATH=./syso/res_windows_$GOARCH.syso
 
 if [[ "$GOOS" == "darwin" ]]; then
     export CGO_ENABLED=1 # PRe or Pos sudo?
@@ -56,21 +57,6 @@ if [[ "$GOOS" == "darwin" ]]; then
 
     chmod +x $APPLOCATION.app
 else
-    LIBNAME=liblclbinres
-    LIBVER=$(cat go.mod | grep $LIBNAME | grep -Eo 'v\d\S+')
-    SYSOPATH=./syso/res_windows_$GOARCH.syso
-    
-    if [[ "$GOPATH" != "" ]]; then
-        BINPATH="$GOPATH"
-    else
-        BINPATH="$HOME/go"
-    fi
-
-    LIBPATH=$BINPATH/pkg/mod/github.com/ying32/$LIBNAME@$LIBVER
-
-    sudo cp ./assets/liblcl_*.go $LIBPATH
-    go clean -cache
-
     if [[ "$GOOS" == "windows" ]]; then
         if [ ! -f "$SYSOPATH" ]; then
             GOOS=$SYSOS GOARCH=$SYSARCH go build github.com/akavel/rsrc
@@ -78,9 +64,13 @@ else
             rm ./rsrc
         fi
 
-        go build -tags tempdll -ldflags="-H windowsgui" -o $APPLOCATION.exe
+        go build -ldflags="-s -w -H windowsgui" -o $APPNAME.exe
+        zip -q $APPLOCATION.zip $APPNAME.exe ./assets/liblcl_$GOOS\_$GOARCH.dll
+        rm $APPNAME.exe
     else
         export CGO_ENABLED=1
-        go build -tags tempdll -ldflags="-s -w" -o $APPLOCATION
+        go build -ldflags="-s -w" -o $APPNAME
+        tar -czf $APPLOCATION.tar.gz $APPNAME ./assets/liblcl_$GOOS_$GOARCH.so
+        rm $APPNAME
     fi
 fi

@@ -51,12 +51,40 @@ if [[ "$GOOS" == "darwin" ]]; then
     mv ./bin $APPLOCATION.app/Contents/MacOS/$APPNAME
     cp ./assets/info.plist $APPLOCATION.app/Contents
     cp ./assets/icon.icns $APPLOCATION.app/Contents/Resources/$APPNAME.icns
-    cp ./assets/liblcl_$GOOS\_$GOARCH.dylib $APPLOCATION.app/Contents/MacOS/liblcl.dylib
+    cp ./assets/liblcl_${GOOS}_$GOARCH.dylib $APPLOCATION.app/Contents/MacOS/liblcl.dylib
     sed -i'' -e "s/__appname__/$APPNAME/g" $APPLOCATION.app/Contents/info.plist
     rm $APPLOCATION.app/Contents/info.plist-e
 
     chmod +x $APPLOCATION.app
 else
+    if [[ "$1" == "libres" ]]; then
+        export LIBRES="-tags tempdll"
+        APPNAME=$APPLOCATION
+
+        LIBNAME=liblclbinres
+        LIBVER=$(cat go.mod | grep $LIBNAME | grep -Eo 'v\d\S+')
+
+        if [[ "$GOPATH" != "" ]]; then
+            BINPATH="$GOPATH"
+        else
+            BINPATH="$HOME/go"
+        fi
+
+        LIBPATH=$BINPATH/pkg/mod/github.com/ying32/$LIBNAME@$LIBVER
+
+        if [[ ! -f "$LIBPATH/liblcl_${GOOS}_$GOARCH.go" ]]; then
+            if [[ "$GOOS" == "windows" ]]; then
+                LIBEXT="dll"
+            else
+                LIBEXT="so"
+            fi
+
+            GOOS=$SYSOS GOARCH=$SYSARCH go run utils/main.go ./assets/liblcl_${GOOS}_$GOARCH.$LIBEXT ./liblcl_${GOOS}_$GOARCH.go
+            sudo mv ./liblcl_${GOOS}_$GOARCH.go $LIBPATH
+            go clean -cache
+        fi
+    fi
+
     if [[ "$GOOS" == "windows" ]]; then
         if [ ! -f "$SYSOPATH" ]; then
             GOOS=$SYSOS GOARCH=$SYSARCH go build github.com/akavel/rsrc
@@ -64,13 +92,19 @@ else
             rm ./rsrc
         fi
 
-        go build -ldflags="-s -w -H windowsgui" -o $APPNAME.exe
-        zip -q $APPLOCATION.zip $APPNAME.exe ./assets/liblcl_$GOOS\_$GOARCH.dll
-        rm $APPNAME.exe
+        go build $LIBRES -ldflags="-s -w -H windowsgui" -o $APPNAME.exe
+
+        if [[ "$LIBRES" == "" ]]; then
+            zip -q $APPLOCATION.zip $APPNAME.exe ./assets/liblcl_${GOOS}_$GOARCH.dll
+            rm $APPNAME.exe
+        fi
     else
         export CGO_ENABLED=1
-        go build -ldflags="-s -w" -o $APPNAME
-        tar -czf $APPLOCATION.tar.gz $APPNAME ./assets/liblcl_$GOOS\_$GOARCH.so
-        rm $APPNAME
+        go build $LIBRES -ldflags="-s -w" -o $APPNAME
+
+        if [[ "$LIBRES" == "" ]]; then
+            tar -czf $APPLOCATION.tar.gz $APPNAME ./assets/liblcl_${GOOS}_$GOARCH.so
+            rm $APPNAME
+        fi
     fi
 fi

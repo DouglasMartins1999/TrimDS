@@ -51,7 +51,7 @@ if [[ "$GOOS" == "darwin" ]]; then
     mv ./bin $APPLOCATION.app/Contents/MacOS/$APPNAME
     cp ./assets/info.plist $APPLOCATION.app/Contents
     cp ./assets/icon.icns $APPLOCATION.app/Contents/Resources/$APPNAME.icns
-    cp ./assets/liblcl_$GOOS_$GOARCH.dylib $APPLOCATION.app/Contents/MacOS/liblcl.dylib
+    cp ./assets/liblcl_$GOOS\_$GOARCH.dylib $APPLOCATION.app/Contents/MacOS/liblcl.dylib
     sed -i'' -e "s/__appname__/$APPNAME/g" $APPLOCATION.app/Contents/info.plist
     rm $APPLOCATION.app/Contents/info.plist-e
 
@@ -70,7 +70,7 @@ else
     else
         export CGO_ENABLED=1
         go build -ldflags="-s -w" -o $APPNAME
-        tar -czf $APPLOCATION.tar.gz $APPNAME ./assets/liblcl_$GOOS_$GOARCH.so
+        tar -czf $APPLOCATION.tar.gz $APPNAME ./assets/liblcl_$GOOS\_$GOARCH.so
         rm $APPNAME
     fi
 fi

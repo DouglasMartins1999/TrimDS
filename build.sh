@@ -95,16 +95,18 @@ else
         go build $LIBRES -ldflags="-s -w -H windowsgui" -o $APPNAME.exe
 
         if [[ "$LIBRES" == "" ]]; then
-            zip -q $APPLOCATION.zip $APPNAME.exe ./assets/liblcl_${GOOS}_$GOARCH.dll
-            rm $APPNAME.exe
+            ln -s ./assets/liblcl_${GOOS}_$GOARCH.dll ./liblcl.dll
+            zip -q $APPLOCATION.zip $APPNAME.exe liblcl.dll
+            rm $APPNAME.exe liblcl.dll
         fi
     else
         export CGO_ENABLED=1
         go build $LIBRES -ldflags="-s -w" -o $APPNAME
 
         if [[ "$LIBRES" == "" ]]; then
-            tar -czf $APPLOCATION.tar.gz $APPNAME ./assets/liblcl_${GOOS}_$GOARCH.so
-            rm $APPNAME
+            ln -s ./assets/liblcl_${GOOS}_$GOARCH.so ./liblcl.so
+            tar -czhf $APPLOCATION.tar.gz $APPNAME liblcl.so
+            rm $APPNAME liblcl.so
         fi
     fi
 fi

@@ -20,6 +20,8 @@ elif [[ "$(uname -m)" == "i386" ]]; then
     export SYSARCH="386"
 elif [[ "$(uname -m)" == "aarch64" ]]; then
     export SYSARCH="arm64"
+elif [[ "$(uname -m)" == "arm64" ]]; then
+    export SYSARCH="arm64"
 elif [[ "$(uname -m)" == "armv8l" ]]; then
     export SYSARCH="arm64"
 elif [[ "$(uname -m)" == "armv8b" ]]; then
@@ -34,28 +36,36 @@ if [[ "$GOARCH" == "" ]]; then
     export GOARCH="$SYSARCH"
 fi
 
-APPNAME=trimDS
+APPNAME=TrimDS
 APPLOCATION=./dist/$APPNAME.$GOARCH
-SYSOPATH=./syso/res_windows_$GOARCH.syso
+SYSOPATH=./assets/res_windows_$GOARCH.syso
 
 if [[ "$GOOS" == "darwin" ]]; then
-    export CGO_ENABLED=1 # PRe or Pos sudo?
-    sudo go build -ldflags="-s -w" -o bin
+    export CGO_ENABLED=1
+    go build -ldflags="-s -w" -o bin
 
-    rm -rf $APPLOCATION.app
-    mkdir $APPLOCATION.app
-    mkdir $APPLOCATION.app/Contents
-    mkdir $APPLOCATION.app/Contents/MacOS
-    mkdir $APPLOCATION.app/Contents/Resources
+    rm -rf $APPNAME.app
+    mkdir $APPNAME.app
+    mkdir $APPNAME.app/Contents
+    mkdir $APPNAME.app/Contents/MacOS
+    mkdir $APPNAME.app/Contents/Resources
 
-    mv ./bin $APPLOCATION.app/Contents/MacOS/$APPNAME
-    cp ./assets/info.plist $APPLOCATION.app/Contents
-    cp ./assets/icon.icns $APPLOCATION.app/Contents/Resources/$APPNAME.icns
-    cp ./assets/liblcl_${GOOS}_$GOARCH.dylib $APPLOCATION.app/Contents/MacOS/liblcl.dylib
-    sed -i'' -e "s/__appname__/$APPNAME/g" $APPLOCATION.app/Contents/info.plist
-    rm $APPLOCATION.app/Contents/info.plist-e
+    mv ./bin $APPNAME.app/Contents/MacOS/$APPNAME
+    cp ./assets/info.plist $APPNAME.app/Contents
+    cp ./assets/icon.icns $APPNAME.app/Contents/Resources/$APPNAME.icns
+    cp ./assets/liblcl_${GOOS}_$GOARCH.dylib $APPNAME.app/Contents/MacOS/liblcl.dylib
+    sed -i'' -e "s/__appname__/$APPNAME/g" $APPNAME.app/Contents/info.plist
+    rm $APPNAME.app/Contents/info.plist-e
 
-    chmod +x $APPLOCATION.app
+    chmod +x $APPNAME.app
+    
+    rm -rf $APPLOCATION
+    mkdir -p $APPLOCATION
+    mv $APPNAME.app $APPLOCATION
+    hdiutil create "$APPLOCATION.tmp.dmg" -ov -volname "$APPNAME Install" -fs HFS+ -srcfolder "$APPLOCATION" &> /dev/null
+    hdiutil convert "$APPLOCATION.tmp.dmg" -format UDZO -o "$APPLOCATION.dmg" &> /dev/null
+    rm "$APPLOCATION.tmp.dmg"
+
 else
     if [[ "$1" == "libres" ]]; then
         export LIBRES="-tags tempdll"
@@ -95,16 +105,18 @@ else
         go build $LIBRES -ldflags="-s -w -H windowsgui" -o $APPNAME.exe
 
         if [[ "$LIBRES" == "" ]]; then
-            zip -q $APPLOCATION.zip $APPNAME.exe ./assets/liblcl_${GOOS}_$GOARCH.dll
-            rm $APPNAME.exe
+            ln -s ./assets/liblcl_${GOOS}_$GOARCH.dll ./liblcl.dll
+            zip -q $APPLOCATION.zip $APPNAME.exe liblcl.dll
+            rm $APPNAME.exe liblcl.dll
         fi
     else
         export CGO_ENABLED=1
         go build $LIBRES -ldflags="-s -w" -o $APPNAME
 
         if [[ "$LIBRES" == "" ]]; then
-            tar -czf $APPLOCATION.tar.gz $APPNAME ./assets/liblcl_${GOOS}_$GOARCH.so
-            rm $APPNAME
+            ln -s ./assets/liblcl_${GOOS}_$GOARCH.so ./liblcl.so
+            tar -czhf $APPLOCATION.tar.gz $APPNAME liblcl.so
+            rm $APPNAME liblcl.so
         fi
     fi
 fi
